@@ -27,6 +27,11 @@ runTeletypePure i
       ReadTTY -> maybe "" id <$> input
       WriteTTY msg -> output msg
 
+teletypeToIO :: Sem (Teletype ': r) a -> Sem (Input (Maybe String) : Output String : r) a
+teletypeToIO = reinterpret2 \case
+  ReadTTY -> maybe "" id <$> input
+  WriteTTY msg -> output msg
+
 echo :: Members '[Random, Teletype] r => Sem r ()
 echo = do
   i <- readTTY

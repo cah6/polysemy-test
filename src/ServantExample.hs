@@ -47,8 +47,8 @@ lookupP k = do
   return $ fromJust d
 
 type MyDataApi =
-      "happy-hours" :> Capture "happy-hour-id" UUID :> ReqBody '[JSON] MyData :> Put '[JSON] NoContent
-  :<|>"happy-hours" :> Capture "happy-hour-id" UUID :> Get '[JSON] MyData
+      "my-data" :> Capture "my-data-id" UUID :> ReqBody '[JSON] MyData :> Put '[JSON] NoContent
+  :<|>"my-data" :> Capture "my-data-id" UUID :> Get '[JSON] MyData
 
 server :: Members '[KVStore UUID MyData, Random] r => ServerT MyDataApi (Sem r)
 server = updateP :<|> lookupP

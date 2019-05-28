@@ -6,6 +6,7 @@ let
   customHaskellPackages = pinnedPkgs.haskellPackages.override (old: {
     overrides = pinnedPkgs.lib.composeExtensions (old.overrides or (_: _: {})) (self: super: {
       project1 = self.callCabal2nix "project1" ./project1.cabal { };
+      bloodhound = pinnedPkgs.haskell.lib.doJailbreak super.bloodhound;
       polysemy = self.callPackage ./nix/lib/polysemy.nix { };
       polysemy-plugin = self.callPackage ./nix/lib/polysemy-plugin.nix { };
       # addditional overrides go here

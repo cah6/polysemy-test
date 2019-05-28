@@ -4,11 +4,11 @@
 }:
 mkDerivation {
   pname = "polysemy";
-  version = "0.1.2.0";
+  version = "0.2.1.0";
   src = fetchgit {
     url = "https://github.com/isovector/polysemy";
-    sha256 = "024g5yla1rf4in0cpylljscnw1l7jd3bjfc7y8rrvcj8k0gcl922";
-    rev = "17f33bdc931cd3220d5ddb8d15356fa7d7f8bbb3";
+    sha256 = "05pwxnyv3w0rhn2g3f1l2x08x69737sr2nlvg3mcbg0h66fja86x";
+    rev = "b6f16e762bac1b4e68de5e93ac96230284d04017";
   };
   libraryHaskellDepends = [
     base mtl random syb template-haskell transformers

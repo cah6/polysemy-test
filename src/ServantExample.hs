@@ -63,7 +63,7 @@ type MyApplication a = Sem '[Random, KVStore UUID MyData, Input BHEnv, Error Ela
 programInServant ::  MyApplication a 
   ->  Sem '[Lift IO] (Either ServantErr a)
 programInServant input = (runError
-  . runErrorAsAnother toServantErr
+  . runErrorAsAnother (\_ -> err500)
   . provideBhLocalhost
   . runKVStoreBloodhound @UUID @MyData
   . runRandomIO) 
@@ -73,23 +73,11 @@ programInServant input = (runError
 nt :: MyApplication a -> Handler a
 nt input = Handler $ ExceptT $ runM $ programInServant input 
 
-toServantErr :: ElasticsearchKVError -> ServantErr
-toServantErr = \case 
-  ResponseParseError text -> err500
-  KnownEsError text       -> err500
-
 runServant :: IO ()
-runServant = do
-  withStdoutLogger $ \apacheLogger -> do
-    let port = 3000
-        mainLoopF = hPutStrLn stderr ("listening on port " ++ show port)
-        settings = (setPort port . setBeforeMainLoop mainLoopF . setLogger apacheLogger) defaultSettings
-    runSettings settings mkApp
+runServant = runSettings defaultSettings mkApp
 
 mkApp :: Application
-mkApp = serve myDataApi serverDefinition
-    where
-  serverDefinition = hoistServer myDataApi nt server
+mkApp = serve myDataApi (hoistServer myDataApi nt server)
 
 myDataApi :: Proxy MyDataApi
 myDataApi = Proxy

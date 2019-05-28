@@ -35,23 +35,28 @@ data MyData = MyData
   , data2 :: Int
   } deriving (Generic, Show, FromJSON, ToJSON)
 
-updateP :: Members '[KVStore UUID MyData, Random] r => UUID -> MyData -> Sem r NoContent
-updateP uuid myData = do 
+-- Really should return () and not NoContent, but unsure how to convert on interpreter side.
+-- In reality both these could be arbitrarily more complicated, simplest example here.
+updateProgram :: Members '[KVStore UUID MyData, Random] r => MyData -> Sem r NoContent
+updateProgram myData = do 
   newId :: UUID <- random
-  updateKV newId $ Just (MyData "s1" 1)
+  updateKV newId $ Just myData
   return NoContent
 
-lookupP :: Members '[KVStore UUID MyData] r => UUID -> Sem r MyData
-lookupP k = do 
+-- same here, probably best as returning (Maybe MyData)
+lookupProgram :: Members '[KVStore UUID MyData] r => UUID -> Sem r MyData
+lookupProgram k = do 
   d :: Maybe MyData <- lookupKV k
   return $ fromJust d
 
 type MyDataApi =
-      "my-data" :> Capture "my-data-id" UUID :> ReqBody '[JSON] MyData :> Put '[JSON] NoContent
+      -- POST to create a new entry
+      "my-data" :> ReqBody '[JSON] MyData :> Put '[JSON] NoContent
+      -- GET to retrieve one by id
   :<|>"my-data" :> Capture "my-data-id" UUID :> Get '[JSON] MyData
 
 server :: Members '[KVStore UUID MyData, Random] r => ServerT MyDataApi (Sem r)
-server = updateP :<|> lookupP
+server = updateProgram :<|> lookupProgram
 
 type MyApplication a = Sem '[Random, KVStore UUID MyData, Input BHEnv, Error ElasticsearchKVError, Error ServantErr, Lift IO] a
 
